@@ -1,0 +1,22 @@
+textarea {
+    min-height: 400px;
+}
+
+
+#emails-view .boder-email {
+    border: 1px solid black;
+    padding: 10px;
+    margin: 20px;
+    border-radius: 5px;
+    max-width: fit-content;
+}
+
+#emails-view .boder-email-read {
+    font-weight: bold;
+    font-size: 18px;
+    background-color: white;
+}
+
+#emails-view .boder-email-unread {
+    background-color: hsla(0, 0%, 95%, 0.377);
+}
