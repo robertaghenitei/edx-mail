@@ -25,22 +25,31 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 }
 
-function load_mailbox(mailbox) {
-  
+function load_mailbox(mailbox) { 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
-
-  // Show the mailbox name
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
-  
-  // Fetch emails from mailbox and display them
-  
+// Show the mailbox name
+  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`; 
+  // Fetch emails from mailbox and display them 
     fetch(`/emails/${mailbox}`)
      .then(response => response.json())
      .then(emails => {
         emails.forEach(email => {
           const row = document.createElement('div');
+          let bodyShow = false;
+          const emailBodyDisplay = document.createElement('p');
+            emailBodyDisplay.style.color = 'blue'
+            emailBodyDisplay.innerHTML = email.body;
+            row.append(emailBodyDisplay);
+            emailBodyDisplay.style.display = 'None';
+          row.addEventListener('click', function() {
+            if (bodyShow === false) {
+              emailBodyDisplay.style.display = 'block';
+            } else {
+              emailBodyDisplay.style.display = 'None';
+            }
+        });
           if (email.read === true) {
             row.classList.add('border-email-read');
           } else {
@@ -63,7 +72,6 @@ function load_mailbox(mailbox) {
      .catch(error => {
         console.error('Error fetching emails:', error);
       });
- 
 }
 
 
