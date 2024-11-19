@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-  document.querySelector('#compose').addEventListener('click', compose_email());
+  document.querySelector('#compose').addEventListener('click', compose_email);
 
   // Compose new email and submit handler
   document.querySelector('#compose-form').addEventListener('submit', send_email);
@@ -18,53 +18,61 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
-
+  document.querySelector('#email-detail-view').style.display = 'none';
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 }
 
+
+function view_email(id){
+  fetch(`emails/${id}`).
+  then(response=>response.json()).
+  then(email=>{
+    
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-detail-view').style.display = 'block';
+  document.querySelector('#email-detail-view').innerHTML = email.body;
+  
+  });
+  
+}
+
+
+
 function load_mailbox(mailbox) { 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-detail-view').style.display = 'none';
 // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`; 
   // Fetch emails from mailbox and display them 
     fetch(`/emails/${mailbox}`)
      .then(response => response.json())
      .then(emails => {
+        //loop through every email in the json  response and create a div element for each
         emails.forEach(email => {
+          console.log(email);
+          //create a div for every email 
           const row = document.createElement('div');
-          let bodyShow = false;
-          const emailBodyDisplay = document.createElement('p');
-            emailBodyDisplay.style.color = 'blue'
-            emailBodyDisplay.innerHTML = email.body;
-            row.append(emailBodyDisplay);
-            emailBodyDisplay.style.display = 'None';
-          row.addEventListener('click', function() {
-            if (bodyShow === false) {
-              emailBodyDisplay.style.display = 'block';
-            } else {
-              emailBodyDisplay.style.display = 'None';
-            }
-        });
-          if (email.read === true) {
-            row.classList.add('border-email-read');
-          } else {
-            row.classList.add('boder-email-unread');
-          }
 
-          row.classList.add('boder-email');
+          row.classList.add('list-group-item');
+          row.classList.add('border-style');
           row.innerHTML = `
-          <tr>
-            <td>${email.sender}</td>
-            <td>${email.subject}</td>
-            <td>${email.timestamp}</td>
-          </tr>
+            <h6>${email.sender}</h6>
+            <h5>${email.subject}</h5>
+            <p>${email.timestamp}</p>
             <br>
           `;
+          row.classList.add(email.read ? 'read' : 'unread');
+
+          row.addEventListener('click', function(){
+            view_email(email.id);
+          });
+
           document.querySelector('#emails-view').append(row);
           
         });
@@ -111,3 +119,5 @@ function send_email(event) {
      // Clear compose form
     return false;
 }
+
+
