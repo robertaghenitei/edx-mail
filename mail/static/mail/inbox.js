@@ -5,13 +5,29 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
-
   // Compose new email and submit handler
   document.querySelector('#compose-form').addEventListener('submit', send_email);
 
     // By default, load the inbox
   load_mailbox('inbox');
 }) ;
+
+function archive(id){
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+  })};
+
+function unarchive(id){
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: false
+    })
+  })
+}
 
 function compose_email() {
 
@@ -30,14 +46,27 @@ function view_email(id){
   fetch(`emails/${id}`).
   then(response=>response.json()).
   then(email=>{
-    
+    fetch(`/emails/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+          read: true
+      })
+    })
+    if(email.archived === true){
+      document.getElementById('#archive').value = "Archive";
+      document.querySelector('#archive').addEventListener('click', () => archive(id));
+    } else {
+      document.getElementById('#archive').value = "Unarchive";
+      document.querySelector('#archive').addEventListener('click', () => unarchive(id))
+    }
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-detail-view').style.display = 'block';
-  document.querySelector('#email-detail-view').innerHTML = email.body;
-  
-  });
-  
+  document.querySelector('#email-header').innerHTML = `<h5>Sender: ${email.sender}</h5><h5>Recipients: ${email.recipients}</h5><h4>Subject: ${email.subject}</h4>`;
+  document.querySelector('#email-body').innerHTML = `<p>${email.body}</p>`;
+  document.querySelector('#email-footer').innerHTML = `<h6>${email.timestamp}</h6>`;
+});
+
 }
 
 
